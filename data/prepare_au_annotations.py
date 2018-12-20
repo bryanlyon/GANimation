@@ -16,9 +16,13 @@ def get_data(filepaths):
     for filepath in tqdm(filepaths):
         content = np.loadtxt(filepath, delimiter=', ', skiprows=1)
         if np.size(content.shape) == 1:
-            data[os.path.basename(filepath[:-4])] = content[2:19]
+            data[os.path.basename(filepath[:-4])] = content[676:693]
+            print(filepath)
+            print(str(content[676:693])+str("\n"))
         else:
-            data[os.path.basename(filepath[:-4])] = content[0,2:19]
+            data[os.path.basename(filepath[:-4])] = content[0,676:693]
+            print(filepath)
+            print(str(content[0,676:693])+str("\n"))
 
     return data
 
