@@ -117,14 +117,14 @@ class Train:
             errors = self._model.get_current_errors()
 
             # store current batch errors
-            for k, v in errors.iteritems():
+            for k, v in errors.items():
                 if k in val_errors:
                     val_errors[k] += v
                 else:
                     val_errors[k] = v
 
         # normalize errors
-        for k in val_errors.iterkeys():
+        for k in val_errors.keys():
             val_errors[k] /= self._opt.num_iters_validate
 
         # visualize

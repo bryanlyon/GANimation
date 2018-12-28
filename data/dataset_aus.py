@@ -34,9 +34,9 @@ class AusDataset(DatasetBase):
             real_cond = self._get_cond_by_id(sample_id)
 
             if real_img is None:
-                print 'error reading image %s, skipping sample' % sample_id
+                print ('error reading image %s, skipping sample' % sample_id)
             if real_cond is None:
-                print 'error reading aus %s, skipping sample' % sample_id
+                print ('error reading aus %s, skipping sample' % sample_id)
 
         desired_cond = self._generate_random_cond()
 

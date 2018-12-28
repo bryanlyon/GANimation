@@ -315,23 +315,23 @@ class GANimation(BaseModel):
                torch.sum(torch.abs(mat[:, :, :-1, :] - mat[:, :, 1:, :]))
 
     def get_current_errors(self):
-        loss_dict = OrderedDict([('g_fake', self._loss_g_fake.data[0]),
-                                 ('g_cond', self._loss_g_cond.data[0]),
-                                 ('g_mskd_fake', self._loss_g_masked_fake.data[0]),
-                                 ('g_mskd_cond', self._loss_g_masked_cond.data[0]),
-                                 ('g_cyc', self._loss_g_cyc.data[0]),
-                                 ('g_rgb', self._loss_rec_real_img_rgb.data[0]),
-                                 ('g_rgb_un', self._loss_g_unmasked_rgb.data[0]),
-                                 ('g_rgb_s', self._loss_g_fake_imgs_smooth.data[0]),
-                                 ('g_m1', self._loss_g_mask_1.data[0]),
-                                 ('g_m2', self._loss_g_mask_2.data[0]),
-                                 ('g_m1_s', self._loss_g_mask_1_smooth.data[0]),
-                                 ('g_m2_s', self._loss_g_mask_2_smooth.data[0]),
-                                 ('g_idt', self._loss_g_idt.data[0]),
-                                 ('d_real', self._loss_d_real.data[0]),
-                                 ('d_cond', self._loss_d_cond.data[0]),
-                                 ('d_fake', self._loss_d_fake.data[0]),
-                                 ('d_gp', self._loss_d_gp.data[0])])
+        loss_dict = OrderedDict([('g_fake', self._loss_g_fake.item()),
+                                 ('g_cond', self._loss_g_cond.item()),
+                                 ('g_mskd_fake', self._loss_g_masked_fake.item()),
+                                 ('g_mskd_cond', self._loss_g_masked_cond.item()),
+                                 ('g_cyc', self._loss_g_cyc.item()),
+                                 ('g_rgb', self._loss_rec_real_img_rgb.item()),
+                                 ('g_rgb_un', self._loss_g_unmasked_rgb.item()),
+                                 ('g_rgb_s', self._loss_g_fake_imgs_smooth.item()),
+                                 ('g_m1', self._loss_g_mask_1.item()),
+                                 ('g_m2', self._loss_g_mask_2.item()),
+                                 ('g_m1_s', self._loss_g_mask_1_smooth.item()),
+                                 ('g_m2_s', self._loss_g_mask_2_smooth.item()),
+                                 ('g_idt', self._loss_g_idt.item()),
+                                 ('d_real', self._loss_d_real.item()),
+                                 ('d_cond', self._loss_d_cond.item()),
+                                 ('d_fake', self._loss_d_fake.item()),
+                                 ('d_gp', self._loss_d_gp.item())])
 
         return loss_dict
 
