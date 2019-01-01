@@ -412,3 +412,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# local file
+img_dataset
