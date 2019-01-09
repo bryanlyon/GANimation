@@ -376,7 +376,7 @@ class GANimation(BaseModel):
         self._load_network(self._G, 'G', load_epoch)
 
         if self._is_train:
-            # load D
+            # load Dcd
             self._load_network(self._D, 'D', load_epoch)
 
             # load optimizers

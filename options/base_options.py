@@ -16,7 +16,7 @@ class BaseOptions():
         self._parser.add_argument('--aus_file', type=str, default='aus_openface.pkl', help='file containing samples aus')
 
         self._parser.add_argument('--load_epoch', type=int, default=-1, help='which epoch to load? set to -1 to use latest cached model')
-        self._parser.add_argument('--batch_size', type=int, default=4, help='input batch size')
+        self._parser.add_argument('--batch_size', type=int, default=1, help='input batch size')
         self._parser.add_argument('--image_size', type=int, default=128, help='input image size')
         self._parser.add_argument('--cond_nc', type=int, default=17, help='# of conditions')
         self._parser.add_argument('--gpu_ids', type=str, default='0', help='gpu ids: e.g. 0  0,1,2, 0,2. use -1 for CPU')
