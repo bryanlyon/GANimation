@@ -9,8 +9,9 @@ import numpy as np
 from options.test_options import TestOptions
 from networks import generatorFoward
 import utils.util as util
-
+import pickle
 import time
+import random
 
 class feedFoward:
     def __init__(self, path):
@@ -24,7 +25,7 @@ class feedFoward:
 
     def convert(self, face, desired_expression):
         face = torch.unsqueeze(self._transform(face), 0).float()
-        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/20.0), 0).float()
+        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/5.0), 0).float()
         start = time.clock()
         color, mask = self._model.forward(face, desired_expression)
         end = time.clock()
@@ -45,16 +46,27 @@ class feedFoward:
 
 
 def main():
-    path = './checkpoints/original_model/net_epoch_20_id_G.pth'
+    path = './checkpoints/original_model/net_epoch_30_id_G.pth'
     convertor = feedFoward(path)
     # dummy_input = np.random.randint(255, size=(128, 128, 3)).astype(np.uint8)
-    real_face_raw = cv2.imread('./sample_dataset/imgs/085979.jpg')
+    real_face_raw = cv2.imread('./sample_dataset/imgs/000312.jpg')
     real_face = cv2.cvtColor(real_face_raw, cv2.COLOR_BGR2RGB)
-    expressions = np.ndarray((4,17), dtype = np.float)
+    expressions = np.ndarray((10,17), dtype = np.float)
+
+    f = open('./sample_dataset/aus_openface.pkl', 'rb')
+    conds = pickle.load(f)
+
+
+    '''
     expressions[0] = np.array([0, 0, 0, 0, 2.5, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0], dtype = np.float) # happy
     expressions[1] = np.array([3, 0, 5, 0, 2.5, 0, 0, 0, 0, 0, 5, 3.3, 0, 0, 0, 0, 0], dtype = np.float) # sad
     expressions[2] = np.array([0, 0, 5, 0, 0, 5, 0, 1.5, 0, 0, 0, 2.5, 0, 1.5, 0, 0, 0], dtype = np.float) # angry
     expressions[3] = np.array([5, 5, 0, 3.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0], dtype = np.float) # surprise
+    '''
+    for i in range(10):
+        expressions[i] =  random.choice(list(conds.values())) + np.random.uniform(-0.1, 0.1, 17)
+        print(expressions[0])
+
     # origin_expression = np.array([0, 0, 0.46, 0, 0, 0, 0.03, 0, 0, 0.59, 0.02, 0.22, 0, 0.21, 0, 0, 0], dtype = np.float)
 
     result = real_face_raw

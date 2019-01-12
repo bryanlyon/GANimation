@@ -1,16 +1,19 @@
 import cv2
 import numpy as np 
 import os
+import sys
+sys.path.insert(0, 'E:/celebA/GANimation/utils')
+import face_utils as face
 
-input_image_path = './imgs_178/'
-output_image_path = './imgs_128/'
-file_list = os.listdir(input_image_path)
+input_image_path = './sample_dataset/imgs_178/'
+output_image_path = './sample_dataset/imgs/'
 
-for img_name in file_list:
-    name = img_name.split('.')
-    img = cv2.imread(input_image_path+img_name)
-    img = img[20:198, 0:]
-    # cv2.imshow('test', img)
-    # cv2.waitKey(0)
-    img = cv2.resize(img, (128,128), interpolation=cv2.INTER_CUBIC)
-    cv2.imwrite(output_image_path + name[0]+'.jpg', img)
+image_names = os.listdir(input_image_path)
+
+for name in image_names:
+    img = cv2.imread(input_image_path+name)
+    bb = face.detect_biggest_face(img)
+    if bb != None:
+        img = img[bb[1]:bb[1]+bb[3], bb[0]:bb[0]+bb[2]]
+        img = face.resize_face(img)
+        cv2.imwrite(output_image_path+name, img)

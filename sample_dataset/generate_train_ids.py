@@ -3,7 +3,7 @@ import os
 csv_train = open('train_ids.csv', 'w')
 csv_test = open('test_ids.csv', 'w')
 
-file_list = os.listdir('./imgs_128')
+file_list = os.listdir('./imgs')
 
 trian_file_list = file_list[0:int(len(file_list)/10*9)]
 test_file_list = file_list[int(len(file_list)/10*9):]

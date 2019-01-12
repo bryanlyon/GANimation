@@ -45,7 +45,7 @@ class MorphFacesInTheWild:
 
     def _morph_face(self, face, desired_expression, origin_expression):
         face = torch.unsqueeze(self._transform(Image.fromarray(face)), 0)
-        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/10.0), 0)
+        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/5.0), 0)
         origin_expression = torch.unsqueeze(torch.from_numpy(origin_expression/5.0), 0)
         test_batch = {'real_img': face, 'real_cond': origin_expression, 'desired_cond': desired_expression, 'sample_id': torch.FloatTensor(), 'real_img_path': []}
         self._model.set_input(test_batch)
@@ -69,8 +69,10 @@ def main():
 
     image_path = opt.input_path
     # expression = np.random.uniform(0, 1, opt.cond_nc)
-    desired_expression = np.array([0, 0, 0.16, 0, 1.75, 0.58, 0, 1.32, 2.82, 1.13, 0, 0, 0.08, 0, 1.93, 0, 0], dtype = np.float)
-    origin_expression = np.array([0, 0, 0.46, 0, 0, 0, 0.03, 0, 0, 0.59, 0.02, 0.22, 0, 0.21, 0, 0, 0], dtype = np.float)
+    desired_expression = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
+    # desired_expression = np.array([0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype = np.float)
+    origin_expression = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
+    desired_expression = origin_expression
 
     morph.morph_file(image_path, desired_expression, origin_expression)
 
