@@ -49,7 +49,7 @@ def main():
     path = './checkpoints/refined_model/net_epoch_30_id_G.pth'
     convertor = feedFoward(path)
     # dummy_input = np.random.randint(255, size=(128, 128, 3)).astype(np.uint8)
-    name = '202204'
+    name = '999997'
     real_face_raw = cv2.imread('./sample_dataset/imgs/'+name+'.png')
 
     # real_face_raw = real_face_raw[15:203, 0:178]
@@ -68,9 +68,9 @@ def main():
     expressions[2] = np.array([0, 0, 5, 0, 0, 5, 0, 1.5, 0, 0, 0, 2.5, 0, 1.5, 0, 0, 0], dtype = np.float) # angry
     expressions[3] = np.array([5, 5, 0, 3.3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0], dtype = np.float) # surprise
     '''
-    a = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
-    # b = np.array([0.69, 0, 0.01 , 0, 0.19, 1.02, 0 , 0, 1.25, 1.41, 0, 0, 0.59, 0.05, 0.9, 0, 0.33], dtype = np.float)
-    b = conds[name]/10
+    a = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)/1.5
+    b = np.array([0.69, 0, 0.01 , 0, 0.19, 1.02, 0 , 0, 1.25, 1.41, 0, 0, 0.59, 0.05, 0.9, 0, 0.33], dtype = np.float)/10
+    #b = conds[name]/1
     c = (b - a)/9
     print(c)
     print('-------------------------')

@@ -71,8 +71,8 @@ def main():
     # expression = np.random.uniform(0, 1, opt.cond_nc)
     desired_expression = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
     # desired_expression = np.array([0, 0, 0 , 0, 0, 0, 0 , 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], dtype = np.float)
-    origin_expression = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
-    desired_expression = origin_expression
+    origin_expression = np.array([0, 0, 0 , 0, 0.07, 1.18, 0 , 0, 1.16, 1.45, 0, 0.62, 0, 0.58, 0, 0, 0], dtype = np.float)
+    # desired_expression = origin_expression
 
     morph.morph_file(image_path, desired_expression, origin_expression)
 
