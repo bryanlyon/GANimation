@@ -412,3 +412,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+/checkpoints/
+
+/dataset/imgs
+
+/test_results/
