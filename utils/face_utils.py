@@ -88,6 +88,7 @@ def face_crop_and_align(face_img, chin_percent=0.95):
 
     # mouth = np.vstack((np.array(landMark['bottom_lip']), np.array(landMark['top_lip'])))
     chin = np.array(landMark['chin'])
+    #print(chin)
 
     index = np.argmax(chin[:,1])
     chin_max = chin[index]
@@ -95,6 +96,7 @@ def face_crop_and_align(face_img, chin_percent=0.95):
 
     dist = np.sqrt((eye_mean[0] - chin_max[0])**2 + (eye_mean[1] - chin_max[1])**2)
     padding = chin_percent*128-dist
+    #print(chin_percent, padding, dist)
 
     if padding < 0:
         padding = 0
@@ -102,12 +104,51 @@ def face_crop_and_align(face_img, chin_percent=0.95):
     dist = dist + padding
 
     scale = chin_percent*128/dist
-    print(scale)
+    #print(scale)
 
     M = cv2.getRotationMatrix2D((chin_max[0], chin_max[1]), angle, scale)
 
     M[0,2] += 128*0.5 - chin_max[0]
     M[1,2] += 128*chin_percent - chin_max[1]
     output = cv2.warpAffine(face_img, M, (128, 128), flags=cv2.INTER_CUBIC)
-    return output, M, angle
+    return output, M, angle, scale, chin_percent, chin_max[0], chin_max[1]
 
+def face_place_back(image, face_img, angleo, scaleo, chin_percent, chin_xo, chin_yo):
+    '''
+    image     --- the original image
+    face_img  --- processed sub img (128X128) that only has the face
+    angle     --- angle used when clipping face for processing
+    scale     --- scale used when clipping face for processing
+    chin_percent --- predefined portion
+    chin_xo, chin_yo --- position of chin in original image
+    '''
+
+    # if we use a mask of the same size as clipped figure, 
+    # due to the precision problem in rotation will cause discontinuity
+    # instead, we build a slightly smaller mask for putting back, 
+    # avoinding discontinuity
+    margin = 3
+
+    masko = np.ones((128 - margin,128 - margin,3), dtype = np.uint8)
+    masko[0:margin,:,:] = 0
+    masko[:,0:margin,:] = 0
+
+    # find affine matrix M
+    chin_x = 128 * 0.5
+    chin_y = 128 * chin_percent
+    angle  = -angleo
+    scale  = 1./scaleo
+
+    M = cv2.getRotationMatrix2D((chin_x, chin_y), angle, scale)
+    M[0,2] += chin_xo - chin_x
+    M[1,2] += chin_yo - chin_y
+
+    # putback editted figure
+    h = image.shape[1]
+    w = image.shape[0]
+    rotate = cv2.warpAffine(face_img, M, (h, w), flags=cv2.INTER_CUBIC)
+    mask = cv2.warpAffine(masko, M, (h, w), flags=cv2.INTER_CUBIC)
+
+    putback = (1 - mask) * image + mask * rotate
+
+    return putback, mask, rotate
