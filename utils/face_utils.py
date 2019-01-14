@@ -69,3 +69,45 @@ def resize_face(face_img, size=(128, 128)):
 def detect_landmarks(face_img):
     landmakrs = face_recognition.face_landmarks(face_img)
     return landmakrs[0] if len(landmakrs) > 0 else None
+
+def face_crop_and_align(face_img, chin_percent=0.95):
+    landMark = detect_landmarks(face_img)
+
+    left_eye = np.array(landMark['left_eyebrow'])
+    left_eye_mean = np.mean(left_eye, axis= 0)
+
+    right_eye = np.array(landMark['right_eyebrow'])
+    right_eye_mean = np.mean(right_eye, axis = 0)
+
+    eye_mean = (left_eye_mean + right_eye_mean)/2
+
+
+    dY = right_eye_mean[1] - left_eye_mean[1]
+    dX = right_eye_mean[0] - left_eye_mean[0]
+    angle = np.degrees(np.arctan2(dY, dX)) 
+
+    # mouth = np.vstack((np.array(landMark['bottom_lip']), np.array(landMark['top_lip'])))
+    chin = np.array(landMark['chin'])
+
+    index = np.argmax(chin[:,1])
+    chin_max = chin[index]
+
+
+    dist = np.sqrt((eye_mean[0] - chin_max[0])**2 + (eye_mean[1] - chin_max[1])**2)
+    padding = chin_percent*128-dist
+
+    if padding < 0:
+        padding = 0
+    
+    dist = dist + padding
+
+    scale = chin_percent*128/dist
+    print(scale)
+
+    M = cv2.getRotationMatrix2D((chin_max[0], chin_max[1]), angle, scale)
+
+    M[0,2] += 128*0.5 - chin_max[0]
+    M[1,2] += 128*chin_percent - chin_max[1]
+    output = cv2.warpAffine(face_img, M, (128, 128), flags=cv2.INTER_CUBIC)
+    return output, M, angle
+

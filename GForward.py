@@ -49,22 +49,9 @@ class feedFoward:
 def main():
     path = './checkpoints/refined_model/net_epoch_30_id_G.pth'
     # convertor = feedFoward(path)
-    name = '000529'
+    name = '001193'
     real_face_raw = cv2.imread('./sample_dataset/imgs_178/'+name+'.png')
 
-    landMark = face.detect_landmarks(real_face_raw)
-    for facial_feature in landMark.keys():
-        B = random.randint(0,255)
-        G = random.randint(0,255)
-        R = random.randint(0,255)
-        print(facial_feature)
-        for ldm in landMark[facial_feature]:
-            cv2.circle(real_face_raw, ldm, 1, (B,G,R), -1)
-    cv2.imshow('result', real_face_raw)
-    cv2.waitKey()
-
-    
-    '''
     real_face = cv2.cvtColor(real_face_raw, cv2.COLOR_BGR2RGB)
     expressions = np.ndarray((10,17), dtype = np.float)
 
