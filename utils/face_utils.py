@@ -149,6 +149,6 @@ def face_place_back(image, face_img, angleo, scaleo, chin_percent, chin_xo, chin
     rotate = cv2.warpAffine(face_img, M, (h, w), flags=cv2.INTER_CUBIC)
     mask = cv2.warpAffine(masko, M, (h, w), flags=cv2.INTER_CUBIC)
 
-    putback = (1 - mask) * image + mask * rotate
+    placeback = (1 - mask) * image + mask * rotate
 
-    return putback, mask, rotate
+    return placeback, mask, rotate
