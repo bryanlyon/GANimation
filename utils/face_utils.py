@@ -111,16 +111,27 @@ def face_crop_and_align(face_img, chin_percent=0.95):
     M[0,2] += 128*0.5 - chin_max[0]
     M[1,2] += 128*chin_percent - chin_max[1]
     output = cv2.warpAffine(face_img, M, (128, 128), flags=cv2.INTER_CUBIC)
-    return output, M, angle, scale, chin_percent, chin_max[0], chin_max[1]
 
-def face_place_back(image, face_img, angleo, scaleo, chin_percent, chin_xo, chin_yo):
+    face_origin_pos = {"angleo": angle,
+                       "scaleo": scale,
+                       "chin_percent": chin_percent,
+                       "chin_xo": chin_max[0],
+                       "chin_yo": chin_max[1],
+                      }
+
+    return output, face_origin_pos
+
+def face_place_back(imageo, face_img, face_origin_pos, **kwargs):
     '''
-    image     --- the original image
+    imageo    --- the original image
     face_img  --- processed sub img (128X128) that only has the face
+    maskA     --- mask A in the GANimation algorithm
     angle     --- angle used when clipping face for processing
     scale     --- scale used when clipping face for processing
     chin_percent --- predefined portion
     chin_xo, chin_yo --- position of chin in original image
+    kwargs --- if need edge-connect to process the image further,
+               to use kwargs: maskA = maskA
     '''
 
     # if we use a mask of the same size as clipped figure, 
@@ -133,22 +144,43 @@ def face_place_back(image, face_img, angleo, scaleo, chin_percent, chin_xo, chin
     masko[0:margin,:,:] = 0
     masko[:,0:margin,:] = 0
 
-    # find affine matrix M
+    # find the inverse affine matrix M
     chin_x = 128 * 0.5
-    chin_y = 128 * chin_percent
-    angle  = -angleo
-    scale  = 1./scaleo
+    chin_y = 128 * face_origin_pos['chin_percent']
+    angle  = - face_origin_pos['angleo']
+    scale  = 1./face_origin_pos['scaleo']
 
     M = cv2.getRotationMatrix2D((chin_x, chin_y), angle, scale)
-    M[0,2] += chin_xo - chin_x
-    M[1,2] += chin_yo - chin_y
+    M[0,2] += face_origin_pos['chin_xo'] - chin_x
+    M[1,2] += face_origin_pos['chin_yo'] - chin_y
 
     # putback editted figure
-    h = image.shape[1]
-    w = image.shape[0]
+    h = imageo.shape[1]
+    w = imageo.shape[0]
     rotate = cv2.warpAffine(face_img, M, (h, w), flags=cv2.INTER_CUBIC)
     mask = cv2.warpAffine(masko, M, (h, w), flags=cv2.INTER_CUBIC)
 
-    placeback = (1 - mask) * image + mask * rotate
+    placeback = (1 - mask) * imageo + mask * rotate
+
+    # if need edge-connect, construct the mask for further processing
+    # new mask is generated based on mask A and a threshold
+    if kwargs != {}:
+        if kwargs['mask_test']:
+            maskA = 1.0 - kwargs['maskA']
+            new_maskA = cv2.warpAffine(maskA, M, (h, w), flags=cv2.INTER_CUBIC)
+            #print(np.shape(new_maskA),'test')
+            return placeback, mask, rotate, 1.0 - new_maskA
+        else:
+            maskA = kwargs['maskA']
+            threshold = 0.65
+
+            maskA[maskA <= threshold] = 0.
+            maskA[maskA > threshold] = 1.
+
+            new_maskA = cv2.warpAffine(maskA, M, (h, w), flags=cv2.INTER_CUBIC)
+            new_maskA = new_maskA.astype(np.uint8)
+            #print(np.shape(new_maskA),new_maskA.dtype)
+
+            return placeback, new_maskA
 
     return placeback, mask, rotate

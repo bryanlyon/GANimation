@@ -50,7 +50,7 @@ def main():
     path = './checkpoints/refined_model/net_epoch_30_id_G.pth'
     # convertor = feedFoward(path)
     name = '000529'
-    real_face_raw = cv2.imread('./sample_dataset/imgs_178/'+name+'.png')
+    real_face_raw = cv2.imread('/Users/xyli1905/Projects/Datasets/imgs_178/'+name+'.png')
 
     landMark = face.detect_landmarks(real_face_raw)
     for facial_feature in landMark.keys():
@@ -61,7 +61,10 @@ def main():
         for ldm in landMark[facial_feature]:
             cv2.circle(real_face_raw, ldm, 1, (B,G,R), -1)
     cv2.imshow('result', real_face_raw)
-    cv2.waitKey()
+    while True:
+        key = cv2.waitKey()
+        if key == 27:
+            break;
 
     
     '''

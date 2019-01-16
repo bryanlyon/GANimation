@@ -418,3 +418,7 @@ dmypy.json
 /dataset/imgs
 
 /test_results/
+
+/dataset/imgs_align/
+
+/dataset/trainning_2th/
