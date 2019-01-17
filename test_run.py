@@ -82,6 +82,7 @@ def main():
 
     # use any original image as you want and clip it
     img_raw = cv2.imread(arg.img_path)
+    img_raw = cv2.resize(img_raw,(0,0), fx=0.5, fy=0.5)
     #print(np.shape(img_raw))
     img = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
 
@@ -97,6 +98,7 @@ def main():
     # set expression
     expressions = np.ndarray((5,17), dtype = np.float)
     a = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
+    #a = np.array([0.32, 0.06, 0.49, 0.17, 2.37, 2.65, 0.71, 2.16, 2.65, 1.4 , 0.08, 0.07, 0.32, 0.13, 2.29, 0.55, 0.05], dtype = np.float)
     #b = np.array([0.69, 0, 0.01 , 0, 0.19, 1.02, 0 , 0, 1.25, 1.41, 0, 0, 0.59, 0.05, 0.9, 0, 0.33], dtype = np.float)/10
     #c = (b - a)/4
     #for i in range(5):
