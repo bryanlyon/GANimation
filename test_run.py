@@ -78,11 +78,23 @@ def main():
                         help='path to the pretrained model')
     parser.add_argument('--load_epoch', type=int, default=-1, help='specify the model to be loaded')
 
+    parser.add_argument('--AU', type=str, default = './sample_dataset/aus_openface.pkl', help = 'loading pre-processing AU')
+
     arg = parser.parse_args()
+
+    AU_file = open(arg.AU, 'rb')
+    conds = pickle.load(AU_file)
+
+    image_name = arg.img_path.split('.')[-2]
+    print(image_name)
+    image_name = image_name.split('/')[-1]
+
+
+
 
     # use any original image as you want and clip it
     img_raw = cv2.imread(arg.img_path)
-    img_raw = cv2.resize(img_raw,(0,0), fx=0.5, fy=0.5)
+    img_raw = cv2.resize(img_raw,(0,0), fx=0.5, fy=0.5) 
     #print(np.shape(img_raw))
     img = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
 
@@ -97,33 +109,41 @@ def main():
 
     # set expression
     expressions = np.ndarray((5,17), dtype = np.float)
-    a = np.array([0.25, 0.11, 0.2 , 0.16, 1.92, 1.03, 0.3 , 2.15, 2.88, 1.61, 0.03, 0.09, 0.16, 0.11, 2.25, 0.37, 0.05], dtype = np.float)
-    #a = np.array([0.32, 0.06, 0.49, 0.17, 2.37, 2.65, 0.71, 2.16, 2.65, 1.4 , 0.08, 0.07, 0.32, 0.13, 2.29, 0.55, 0.05], dtype = np.float)
-    #b = np.array([0.69, 0, 0.01 , 0, 0.19, 1.02, 0 , 0, 1.25, 1.41, 0, 0, 0.59, 0.05, 0.9, 0, 0.33], dtype = np.float)/10
-    #c = (b - a)/4
-    #for i in range(5):
-    #   expressions[i] = c * i + a
+    a = np.array([0.17, 0.1 , 0.1 , 0.17, 1.11, 0.48, 0.15, 1.35, 2.3 , 1.19, 0.02, 0.05, 0.13, 0.08, 1.7 , 0.3 , 0.03], dtype = np.float)
+
+    try:
+        b = conds[image_name]
+    except:
+        b = np.array([0, 0, 0 , 0, 0.78, 0.78, 0.37 , 0.77, 1.28, 0.61, 0, 1.04, 0, 0.65, 0, 0, 0], dtype = np.float)
+
+    c = (b - a)/4
+
+    for i in range(5):
+       expressions[i] = c * i + a
 
     # run model for expression 'a' only for now
-    processed_face, maskA = convertor.Foward(real_face, a)
-    new_img, mask, rotate, new_maskA = face.face_place_back(img_raw, processed_face, face_origin_pos, 
-                                                            mask_test=True, maskA = maskA)
+    result = np.zeros((1, img_raw.shape[1]*4, 3))
+    for i in range(5):
+        processed_face, maskA = convertor.Foward(real_face, expressions[i])
+        new_img, mask, rotate, new_maskA = face.face_place_back(img_raw, processed_face, face_origin_pos, mask_test=True, maskA = maskA)
+        # handle maskA to image for dispalying
+        maskA_t = np.expand_dims(new_maskA, axis=2)
+        maskA_t = (maskA_t*254.0).astype(np.uint8)
+        maskA_t = np.repeat(maskA_t, 3, axis=-1)
 
-    # handle maskA to image for dispalying
-    maskA_t = np.expand_dims(new_maskA, axis=2)
-    maskA_t = (maskA_t*254.0).astype(np.uint8)
-    maskA_t = np.repeat(maskA_t, 3, axis=-1)
-
-    result = img_raw
-    result = np.hstack((result, rotate, maskA_t, new_img))
-    #print(np.shape(processed_face), np.shape(maskA), maskA.dtype)
+        # result = img_raw
+        current_result = np.hstack((img_raw, rotate, maskA_t, new_img))
+        result = np.vstack((result, current_result))
+        #print(np.shape(processed_face), np.shape(maskA), maskA.dtype)
 
     cv2.imshow('result', result/254.0)
-
+    cv2.waitKey()
+'''
     while True:
         key = cv2.waitKey()
         if key == 27:
             break;
+'''
 
 if __name__ == '__main__':
     main()

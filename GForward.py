@@ -48,7 +48,7 @@ class feedFoward:
 
 def main():
     path = './checkpoints/refined_model/net_epoch_30_id_G.pth'
-    # convertor = feedFoward(path)
+    convertor = feedFoward(path)
     name = '001193'
     real_face_raw = cv2.imread('./sample_dataset/imgs_178/'+name+'.png')
 
@@ -77,7 +77,6 @@ def main():
         result = np.hstack((result, img))
     cv2.imshow('result', result/254.0)
     cv2.waitKey()
-    '''
 
 
 
