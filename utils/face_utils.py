@@ -70,7 +70,7 @@ def detect_landmarks(face_img):
     landmakrs = face_recognition.face_landmarks(face_img)
     return landmakrs[0] if len(landmakrs) > 0 else None
 
-def face_crop_and_align(face_img, chin_percent=0.95):
+def face_crop_and_align(face_img, chin_percent=0.95, eye_center_percent=0.2):
     landMark = detect_landmarks(face_img)
 
     left_eye = np.array(landMark['left_eyebrow'])
@@ -95,15 +95,16 @@ def face_crop_and_align(face_img, chin_percent=0.95):
 
 
     dist = np.sqrt((eye_mean[0] - chin_max[0])**2 + (eye_mean[1] - chin_max[1])**2)
-    padding = chin_percent*128-dist
+
+    scale = 128*(chin_percent - eye_center_percent)/dist
+
+
+    # padding = chin_percent*128-dist
     #print(chin_percent, padding, dist)
-
-    if padding < 0:
-        padding = 0
     
-    dist = dist + padding
+    # dist = dist + padding
 
-    scale = chin_percent*128/dist
+    # scale = chin_percent*128/dist
     #print(scale)
 
     M = cv2.getRotationMatrix2D((chin_max[0], chin_max[1]), angle, scale)

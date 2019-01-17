@@ -94,7 +94,7 @@ def main():
 
     # use any original image as you want and clip it
     img_raw = cv2.imread(arg.img_path)
-    img_raw = cv2.resize(img_raw,(0,0), fx=0.5, fy=0.5) 
+    img_raw = cv2.resize(img_raw,(0,0), fx=1, fy=1)
     #print(np.shape(img_raw))
     img = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
 
@@ -136,6 +136,7 @@ def main():
         result = np.vstack((result, current_result))
         #print(np.shape(processed_face), np.shape(maskA), maskA.dtype)
 
+    result  = cv2.resize(result,(0,0), fx=0.5, fy=0.5)
     cv2.imshow('result', result/254.0)
     cv2.waitKey()
 '''
