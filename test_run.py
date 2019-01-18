@@ -7,6 +7,7 @@ import torch
 import cv2
 import numpy as np
 from networks import generatorFoward
+from networks import discriminatorFoward
 import utils.util as util
 import utils.face_utils as face
 import pickle
@@ -14,37 +15,45 @@ import time
 import random
 
 class feedFoward:
-    def __init__(self, path):
-        self._model = generatorFoward.generatorFoward(conv_dim=64, c_dim=17, repeat_num=6)
-        self._model.load_state_dict(torch.load(path, map_location='cpu'))
-        self._model.eval()
+    def __init__(self, pathG, pathD):
+        # load pre-trained generator here
+        self._modelG = generatorFoward.generatorFoward(conv_dim=64, c_dim=17, repeat_num=6)
+        self._modelG.load_state_dict(torch.load(pathG, map_location='cpu'))
+        self._modelG.eval()
         self._transform = transforms.Compose([transforms.ToTensor(),
                                               transforms.Normalize(mean=[0.5, 0.5, 0.5],
                                                                    std=[0.5, 0.5, 0.5])
                                               ])
+        #load pre-trained discriminator here
+        self._modelD = discriminatorFoward.Discriminator(image_size=128, conv_dim=64, c_dim=5, repeat_num=6)
+        self._modelD.load_state_dict(torch.load(pathD, map_location='cpu'))
+        self._modelD.eval()
 
     def Foward(self, face, desired_expression):
+        # transform face by normalizing 
         face = torch.unsqueeze(self._transform(face), 0).float()
-        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/5.0), 0).float()
-        start = time.clock()
-        color, mask = self._model.forward(face, desired_expression)
-        end = time.clock()
-        print('forward time : %2.5f (s)' % (end - start))
-        # torch.onnx.export(self._model,(face, desired_expression), "alexnet.onnx", verbose=True)
+        desired_expression = torch.unsqueeze(torch.from_numpy(desired_expression/5.0), 0).float() # set up desired expression
+        color, mask = self._modelG.forward(face, desired_expression)
+        # calculate result
         masked_result = mask * face + (1.0 - mask) * color
 
         img = self.convertToimg(masked_result)
-        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
+        img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)# convert to OpenCV color BGR
 
         maskA = mask.detach().numpy()[0]
         maskA = np.transpose(maskA, (1,2,0))
 
         return img, maskA
+
+    def FindAU(self, face):
+        face = torch.unsqueeze(self._transform(face), 0).float()
+        out_real, out_aux = self._modelD.forward(face)
+        return out_real, out_aux
     
     def convertToimg(self, tensor):
         tensor = tensor.cpu().float()
         img = tensor.detach().numpy()[0]
-        img = img*0.5+0.5
+        img = img*0.5+0.5 # reverse transform
         img = np.transpose(img, (1, 2, 0))
         return img*254.0
 
@@ -89,23 +98,20 @@ def main():
     print(image_name)
     image_name = image_name.split('/')[-1]
 
-
-
-
     # use any original image as you want and clip it
     img_raw = cv2.imread(arg.img_path)
     img_raw = cv2.resize(img_raw,(0,0), fx=1, fy=1)
-    #print(np.shape(img_raw))
     img = cv2.cvtColor(img_raw, cv2.COLOR_BGR2RGB)
 
     real_face, face_origin_pos = face.face_crop_and_align(img)
 
     # load pretrained GANimation model and run
-    #path = './checkpoints/original_model/net_epoch_30_id_G.pth'
     epoch_num = find_epoch(arg.model_path, arg.load_epoch)
-    load_filename = 'net_epoch_%s_id_G.pth' % (epoch_num)
-    path = os.path.join(arg.model_path, load_filename)
-    convertor = feedFoward(path)
+    load_filename_generator = 'net_epoch_%s_id_G.pth' % (epoch_num)
+    load_filename_discriminator = 'net_epoch_%s_id_D.pth' % (epoch_num)
+    pathG = os.path.join(arg.model_path, load_filename_generator)
+    pathD = os.path.join(arg.model_path, load_filename_discriminator)
+    convertor = feedFoward(pathG, pathD)
 
     # set expression
     expressions = np.ndarray((5,17), dtype = np.float)
@@ -136,7 +142,7 @@ def main():
         result = np.vstack((result, current_result))
         #print(np.shape(processed_face), np.shape(maskA), maskA.dtype)
 
-    result  = cv2.resize(result,(0,0), fx=0.5, fy=0.5)
+    result  = cv2.resize(result,(0,0), fx=1, fy=1)
     cv2.imshow('result', result/254.0)
     cv2.waitKey()
 '''
