@@ -25,7 +25,7 @@ class feedFoward:
                                                                    std=[0.5, 0.5, 0.5])
                                               ])
         #load pre-trained discriminator here
-        self._modelD = discriminatorFoward.Discriminator(image_size=128, conv_dim=64, c_dim=5, repeat_num=6)
+        self._modelD = discriminatorFoward.Discriminator(image_size=128, conv_dim=64, c_dim=17, repeat_num=6)
         self._modelD.load_state_dict(torch.load(pathD, map_location='cpu'))
         self._modelD.eval()
 
@@ -46,6 +46,7 @@ class feedFoward:
         return img, maskA
 
     def FindAU(self, face):
+        # transform face by normalizing 
         face = torch.unsqueeze(self._transform(face), 0).float()
         out_real, out_aux = self._modelD.forward(face)
         return out_real, out_aux
@@ -111,16 +112,16 @@ def main():
     load_filename_discriminator = 'net_epoch_%s_id_D.pth' % (epoch_num)
     pathG = os.path.join(arg.model_path, load_filename_generator)
     pathD = os.path.join(arg.model_path, load_filename_discriminator)
+
     convertor = feedFoward(pathG, pathD)
 
     # set expression
     expressions = np.ndarray((5,17), dtype = np.float)
     a = np.array([0.17, 0.1 , 0.1 , 0.17, 1.11, 0.48, 0.15, 1.35, 2.3 , 1.19, 0.02, 0.05, 0.13, 0.08, 1.7 , 0.3 , 0.03], dtype = np.float)
 
-    try:
-        b = conds[image_name]
-    except:
-        b = np.array([0, 0, 0 , 0, 0.78, 0.78, 0.37 , 0.77, 1.28, 0.61, 0, 1.04, 0, 0.65, 0, 0, 0], dtype = np.float)
+    out_real, out_aux = convertor.FindAU(real_face) # out_aux is the AU value from D
+    # for test use only        
+    b = out_aux.data.numpy()
 
     c = (b - a)/4
 
@@ -132,6 +133,7 @@ def main():
     for i in range(5):
         processed_face, maskA = convertor.Foward(real_face, expressions[i])
         new_img, mask, rotate, new_maskA = face.face_place_back(img_raw, processed_face, face_origin_pos, mask_test=True, maskA = maskA)
+
         # handle maskA to image for dispalying
         maskA_t = np.expand_dims(new_maskA, axis=2)
         maskA_t = (maskA_t*254.0).astype(np.uint8)
@@ -142,7 +144,7 @@ def main():
         result = np.vstack((result, current_result))
         #print(np.shape(processed_face), np.shape(maskA), maskA.dtype)
 
-    result  = cv2.resize(result,(0,0), fx=1, fy=1)
+    result  = cv2.resize(result,(0,0), fx=0.5, fy=0.5)
     cv2.imshow('result', result/254.0)
     cv2.waitKey()
 '''
