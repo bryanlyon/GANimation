@@ -1,0 +1,1 @@
+**folder of image dateset placed here, e.g. imgs_align/**
