@@ -33,16 +33,14 @@ class MorphFacesInTheWild:
         self._save_img(morphed_img, output_name)
 
     def _img_morph(self, img, expresion):
-        # bbs = face_recognition.face_locations(img)
-        # if len(bbs) > 0:
-        #     y, right, bottom, x = bbs[0]
-        #     bb = x, y, (right - x), (bottom - y)
-        #     face = face_utils.crop_face_with_bb(img, bb)
-        #     face = face_utils.resize_face(face)
-        # else:
-        #     face = face_utils.resize_face(img)
-
-        face = img
+        bbs = face_recognition.face_locations(img)
+        if len(bbs) > 0:
+            y, right, bottom, x = bbs[0]
+            bb = x, y, (right - x), (bottom - y)
+            face = face_utils.crop_face_with_bb(img, bb)
+            face = face_utils.resize_face(face)
+        else:
+            face = face_utils.resize_face(img)
 
         morphed_face = self._morph_face(face, expresion)
 
@@ -75,16 +73,16 @@ def main():
     image_path = opt.input_path
 
     # # Selected expression
-    data = load_expressions("CelebAHigh/aus_openface.json")
-    expression = np.array(data["000151"])
+    # data = load_expressions(opt.input_path + "/aus_openface.json")
+    # expression = np.array(data["000151"])
 
     # # Selected random expression
     #expression = np.array(data[random.choice(data.keys())])
 
     # # Random Masked expression
-    # expression = np.random.uniform(0, 5, opt.cond_nc)
-    # mask = np.random.randint(0, 2, opt.cond_nc)
-    # expression = expression * mask
+    expression = np.random.uniform(0, 3, opt.cond_nc)
+    mask = np.random.randint(0, 2, opt.cond_nc)
+    expression = expression * mask
 
     # # Custom expression
     # expression = np.array([
@@ -106,20 +104,16 @@ def main():
     #     0.6,    # 26 Jaw Drop
     #     0.1])   # 28 Lip Suck
 
-    # print("expression: %s" % (expression))
+    print("expression: %s" % (expression))
 
-    for x in range(674,700):
-        #print(time.time())
-        image_path = opt.input_path + "%06d.bmp" % x
-        # try:
-        #     # expression = np.array(data["%06d" % x])
-        #     # expression *= 1.8
-        morph.morph_file(image_path, expression)
-        # except Exception as e:
-        #     print("Error with %6d.bmp" % x)
-        #     print("Error %s" % e)
+    filepaths = glob.glob(os.path.join(image_path, '*.jpg'))
+    filepaths.sort()
 
-
+    for image_path in tqdm(filepaths):
+        try:
+            morph.morph_file(image_path, expression)
+        except Exception as e:
+            print("Error with %6d" % image_path)
 
 if __name__ == '__main__':
     main()
