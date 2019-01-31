@@ -19,7 +19,9 @@ class Train:
         self._dataset_train_size = len(data_loader_train)
         self._dataset_test_size = len(data_loader_test)
         print('#train images = %d' % self._dataset_train_size)
+        print('#train images source = %d' % len(self._dataset_train))
         print('#test images = %d' % self._dataset_test_size)
+        print('#test images source = %d' % len(self._dataset_test))
 
         self._model = ModelsFactory.get_by_name(self._opt.model, self._opt)
         self._tb_visualizer = TBVisualizer(self._opt)
