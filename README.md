@@ -9,8 +9,10 @@ This code was made public to share our research for the benefit of the scientifi
 ![GANimation](http://www.albertpumarola.com/images/2018/GANimation/teaser.png)
 
 ## Prerequisites
-- Install PyTorch (version 0.3.1), Torch Vision and dependencies from http://pytorch.org
-- Install requirements.txt (```pip install -r requirements.txt```)
+- Install Anaconda https://www.anaconda.com/distribution/#download-section
+- Create a Python 2.7 environment in conda ```conda create -n ganimation python=2.7```
+- Install PyTorch Torch Vision and dependencies ```conda install -c pytorch pytorch ``` and  ```conda install -c soumith torchvision```
+- Install requirements.txt (```python -m pip install -r requirements.txt```)
 
 ## Data Preparation
 The code requires a directory containing the following files:
@@ -23,7 +25,7 @@ An example of this directory is shown in `sample_dataset/`.
 
 To generate the `aus_openface.pkl` extract each image Action Units with [OpenFace](https://github.com/TadasBaltrusaitis/OpenFace/wiki/Action-Units) and store each output in a csv file the same name as the image. Then run:
 ```
-python data/prepare_au_annotations.py
+python data/You can also use data/prepare_au_annotations_and_images.py -ia AUS_FOLDER --ii IMG_FOLDER -op OUTPUT_FOLDER
 ```
 
 ## Run
