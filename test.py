@@ -15,6 +15,7 @@ from options.test_options import TestOptions
 import random
 import json
 import time
+from tqdm import tqdm
 
 class MorphFacesInTheWild:
     def __init__(self, opt):
@@ -40,7 +41,8 @@ class MorphFacesInTheWild:
             face = face_utils.crop_face_with_bb(img, bb)
             face = face_utils.resize_face(face)
         else:
-            face = face_utils.resize_face(img)
+            # face = face_utils.resize_face(img)
+            return None
 
         morphed_face = self._morph_face(face, expresion)
 
@@ -52,7 +54,7 @@ class MorphFacesInTheWild:
         test_batch = {'real_img': face, 'real_cond': expresion, 'desired_cond': expresion, 'sample_id': torch.FloatTensor(), 'real_img_path': []}
         self._model.set_input(test_batch)
         imgs, _ = self._model.forward(keep_data_for_visuals=False, return_estimates=True)
-        return np.concatenate((imgs['real_img'],imgs['fake_imgs']), axis=1)
+        return imgs['concat']#np.concatenate((imgs['real_img'],imgs['fake_imgs']), axis=1)
 
     def _save_img(self, img, filename):
         filepath = os.path.join(self._opt.output_dir, filename)
@@ -80,7 +82,7 @@ def main():
     #expression = np.array(data[random.choice(data.keys())])
 
     # # Random Masked expression
-    expression = np.random.uniform(0, 3, opt.cond_nc)
+    expression = np.random.uniform(0, 2, opt.cond_nc)
     mask = np.random.randint(0, 2, opt.cond_nc)
     expression = expression * mask
 
@@ -113,7 +115,7 @@ def main():
         try:
             morph.morph_file(image_path, expression)
         except Exception as e:
-            print("Error with %6d" % image_path)
+            print("Error converting %s" % image_path)
 
 if __name__ == '__main__':
     main()
